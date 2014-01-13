@@ -1,0 +1,69 @@
+NAME
+
+  Strict::Perl - Perl module to restrict old/unsafe constructs
+
+SYNOPSIS
+
+  use Strict::Perl 2014.01; # must version, must match
+
+DESCRIPTION
+
+  Strict::Perl provides a restricted scripting environment excluding old/unsafe
+  constructs, on both modern Perl and traditional Perl.
+
+  Version specify is required when use Strict::Perl, like;
+
+    use Strict::Perl 2014.01;
+
+  It's die if specified version doesn't match Strict::Perl's version.
+
+  On Perl 5.12 or later, Strict::Perl works as;
+
+    use strict;
+    use warnings qw(FATAL all);
+    use autodie;
+
+  Prohibited Keywords, Special Variables, and Operator are;
+
+    goto  redo  until  foreach  format  write  formline
+    msgctl  msgget  msgrcv  msgsnd  semctl  semget  semop
+    shmctl  shmget  shmread  shmwrite
+    $ARRAY_BASE                        $[
+    $OFMT                              $#
+                                       @F
+                                       $^H
+    $OUTPUT_FIELD_SEPARATOR   $OFS     $,
+    $OUTPUT_RECORD_SEPARATOR  $ORS     $\
+    $LIST_SEPARATOR                    $"
+    $SUBSCRIPT_SEPARATOR      $SUBSEP  $;
+    $MULTILINE_MATCHING                $*
+    $PREMATCH                          $`
+    $MATCH                             $&
+    $POSTMATCH                         $'
+    $FORMAT_PAGE_NUMBER                $%
+    $FORMAT_LINES_PER_PAGE             $=
+    $FORMAT_LINES_LEFT                 $-
+    $FORMAT_NAME                       $~
+    $FORMAT_TOP_NAME                   $^
+    $FORMAT_LINE_BREAK_CHARACTERS      $:
+    $FORMAT_FORMFEED                   $^L
+    $ACCUMULATOR                       $^A
+    ~~ (smartmatch)
+
+  Must Keyword in your script is;
+
+    VERSION
+
+  Please see POD document for other Perl version and more information.
+
+INSTALLATION
+
+  1. Copy Strict/Perl.pm to @INC directory.
+
+SEE ALSO
+
+  ina - CPAN
+  http://search.cpan.org/~ina/
+
+  BackPAN - A Complete History of CPAN
+  http://backpan.perl.org/authors/id/I/IN/INA/
