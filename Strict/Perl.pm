@@ -8,99 +8,55 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.01;
+$Strict::Perl::VERSION = 2014.02;
 
 use 5.00503;
 use strict;
-$^W = 1;
+local $^W = 1;
 
-# verify that we're called correctly so that strictures will work.
-if (__FILE__ !~ m{ \b Strict[/\\]Perl\.pm \z}x) {
-    my($package,$filename,$line) = caller;
-    die "Incorrect use of module '${\__PACKAGE__}' at $filename line $line.\n";
+# use strict;
+sub _strict {
+    require strict;
+    strict::->import;
 }
 
-use vars qw($VERSION_called);
-sub VERSION {
-    my($self,$version) = @_;
-    if ($version != $Strict::Perl::VERSION) {
-        my($package,$filename,$line) = caller;
-        die "$self $version required--this is version $Strict::Perl::VERSION, stopped at $filename line $line.\n";
-    }
-    $VERSION_called = 1;
+# use warnings;
+sub _warnings {
+    require warnings;
+    warnings::->import;
 }
 
-sub import {
-    my($self) = @_;
+# use Fatal qw(...);
+sub _Fatal {
+    require Fatal;
+    package main;
+    Fatal::->import(
+        qw(seek sysseek),                                                                   # :io (excluded: read sysread syswrite)
+        qw(dbmclose dbmopen),                                                               # :dbm
+        qw(binmode close chmod chown fcntl flock ioctl open sysopen truncate),              # :file (excluded: fileno)
+        qw(chdir closedir opendir link mkdir readlink rename rmdir symlink),                # :filesys (excluded: unlink)
+        qw(pipe),                                                                           # :ipc
+        qw(msgctl msgget msgrcv msgsnd),                                                    # :msg
+        qw(semctl semget semop),                                                            # :semaphore
+        qw(shmctl shmget shmread),                                                          # :shm
+        qw(accept bind connect getsockopt listen recv send setsockopt shutdown socketpair), # :socket
+        qw(fork),                                                                           # :threads
+    );
+}
 
-    # must VARSION require
-    unless ($VERSION_called) {
-        my($package,$filename,$line) = caller;
-        die "$self $Strict::Perl::VERSION version required like 'use $self $Strict::Perl::VERSION;', stopped at $filename line $line.\n";
-    }
+# use autodie qw(...);
+sub _autodie {
+    require autodie;
+    package main;
+    autodie::->import(
+        qw(read sysread syswrite), # :io
+        qw(fileno),                # :file
+        # nothing                  # :filesys (excluded: unlink)
+    );
+}
 
-    my @mustword = qw(VERSION);
-    my %used = ();
-
-    # disable considered statements and variables
-    if (open(SCRIPT,$0)) {
-        local $.;
-        while (<SCRIPT>) {
-            if (/ \b (
-                goto   | redo   | until    | foreach |
-                format | write  | formline |
-                msgctl | msgget | msgrcv   | msgsnd  |
-                semctl | semget | semop    |
-                shmctl | shmget | shmread  | shmwrite
-
-            ) \b /x) { # Oops! I did little overkill.
-                die "Use of '$1' statement deprecated in line $.\n";
-            }
-            elsif (/ (
-                \$ARRAY_BASE \b                            | \$\[     |
-                                               \$OFMT \b   | \$\#     |
-                                                             \@F \b   |
-                                                             \$\^H \b |
-
-                \$OUTPUT_FIELD_SEPARATOR \b  | \$OFS \b    | \$\,     |
-                \$OUTPUT_RECORD_SEPARATOR \b | \$ORS \b    | \$\\     |
-                \$LIST_SEPARATOR \b                        | \$\"     |
-                \$SUBSCRIPT_SEPARATOR \b     | \$SUBSEP \b | \$\;     |
-
-                \$MULTILINE_MATCHING \b                    | \$\*     |
-                \$PREMATCH \b                              | \$\`     |
-                \$MATCH \b                                 | \$\&     |
-                \$POSTMATCH \b                             | \$\'     |
-
-                \$FORMAT_PAGE_NUMBER \b                    | \$\%     |
-                \$FORMAT_LINES_PER_PAGE \b                 | \$\=     |
-                \$FORMAT_LINES_LEFT \b                     | \$\-     |
-                \$FORMAT_NAME \b                           | \$\~     |
-                \$FORMAT_TOP_NAME \b                       | \$\^     |
-                \$FORMAT_LINE_BREAK_CHARACTERS \b          | \$\:     |
-                \$FORMAT_FORMFEED \b                       | \$\^L \b |
-                \$ACCUMULATOR \b                           | \$\^A \b
-
-            ) /x) {
-                die "Use of special variable '$1' deprecated in line $.\n";
-            }
-            elsif (/ ( ~~ ) /x) {
-                die "Use of operator '$1' deprecated in line $.\n";
-            }
-            for my $mustword (@mustword) {
-                if (/ \b $mustword \b /x) {
-                    $used{$mustword} = 1;
-                }
-            }
-        }
-        close(SCRIPT);
-    }
-
-    for my $mustword (@mustword) {
-        if (not $used{$mustword}) {
-            die "'$mustword' not found in $0.\n";
-        }
-    }
+# $SIG{__WARN__}, $SIG{__DIE__}
+sub _SIG {
 
     # use warnings qw(FATAL all);
     $SIG{__WARN__} =
@@ -136,55 +92,132 @@ sub import {
         }
         exit(1);
     };
+}
 
-    # use autodie;
-    if ($] > 5.012) {
-        require autodie;
-        package main;
-        autodie::->import;
+# perl 5.000 or later
+sub BEGIN {
+
+    # $SIG{__WARN__}, $SIG{__DIE__}
+    _SIG();
+}
+
+# perl 5.010 or later
+sub UNITCHECK {
+}
+
+# perl 5.006 or later
+sub CHECK {
+
+    # use warnings;
+    _warnings();
+}
+
+# perl 5.005 or later
+sub INIT {
+
+    # use English; $WARNING = 1;
+    $^W = 1;
+}
+
+use vars qw($VERSION_called);
+sub VERSION {
+    my($self,$version) = @_;
+    if ($version != $Strict::Perl::VERSION) {
+        my($package,$filename,$line) = caller;
+        die "$self $version required--this is version $Strict::Perl::VERSION, stopped at $filename line $line.\n";
+    }
+    $VERSION_called = 1;
+}
+
+sub import {
+    my($self) = @_;
+
+    # verify that we're called correctly so that strictures will work.
+    if (__FILE__ !~ m{ \b Strict[/\\]Perl\.pm \z}x) {
+        my($package,$filename,$line) = caller;
+        die "Incorrect use of module '${\__PACKAGE__}' at $filename line $line.\n";
     }
 
-    # use Fatal qw(...);
-    else {
-        require Fatal;
-        package main;
-        Fatal::->import(
-            qw(seek sysseek),                                                                   # :io (excluded: read sysread syswrite)
-            qw(dbmclose dbmopen),                                                               # :dbm
-            qw(binmode close chmod chown fcntl flock ioctl open sysopen truncate),              # :file (excluded: fileno)
-            qw(chdir closedir opendir link mkdir readlink rename rmdir symlink),                # :filesys (excluded: unlink)
-            qw(pipe),                                                                           # :ipc
-            qw(msgctl msgget msgrcv msgsnd),                                                    # :msg
-            qw(semctl semget semop),                                                            # :semaphore
-            qw(shmctl shmget shmread),                                                          # :shm
-            qw(accept bind connect getsockopt listen recv send setsockopt shutdown socketpair), # :socket
-            qw(fork),                                                                           # :threads
-        );
+    # must VARSION require
+    unless ($VERSION_called) {
+        my($package,$filename,$line) = caller;
+        die "$self $Strict::Perl::VERSION version required like 'use $self $Strict::Perl::VERSION;', stopped at $filename line $line.\n";
     }
 
     # use strict;
-    require strict;
-    strict::->import;
+    _strict();
 
-    # use warnings;
-    if ($] > 5.006) {
-        require warnings;
-        warnings::->import;
+    # use Fatal qw(...);
+    _Fatal();
+
+    # use autodie qw(...);
+    if ($] >= 5.010001) {
+        _autodie();
     }
 
-    # use English; $WARNING = 1;
-    else {
-        $^W = 1;
+    my @mustword = qw(VERSION);
+    my %used = ();
 
-#       # read only $^W
-#       tie $^W, __PACKAGE__;
+    # disable considered statements and variables
+    if (open(SCRIPT,$0)) {
+        local $.;
+        while (<SCRIPT>) {
+            if (/ \b (
+                goto   | redo   | until    | foreach |
+                format | write  | formline |
+                msgctl | msgget | msgrcv   | msgsnd  |
+                semctl | semget | semop    |
+                shmctl | shmget | shmread  | shmwrite
+
+            ) \b /x) { # Oops! I did little overkill.
+                die "Use of '$1' statement deprecated in line $.\n";
+            }
+            elsif (/ (
+                \$ARRAY_BASE \b                            | \$\[     |
+                                               \$OFMT \b   | \$\# (?![A-Za-z_\{]) |
+                                                             \@F \b   |
+                                                             \$\^H \b |
+
+                \$OUTPUT_FIELD_SEPARATOR \b  | \$OFS \b    | \$\,     |
+                \$OUTPUT_RECORD_SEPARATOR \b | \$ORS \b    | \$\\     |
+                \$LIST_SEPARATOR \b                        | \$\"     |
+                \$SUBSCRIPT_SEPARATOR \b     | \$SUBSEP \b | \$\;     |
+
+                \$MULTILINE_MATCHING \b                    | \$\*     |
+                \$PREMATCH \b                              | \$\`     |
+                \$MATCH \b                                 | \$\&     |
+                \$POSTMATCH \b                             | \$\'     |
+
+                \$FORMAT_PAGE_NUMBER \b                    | \$\%     |
+                \$FORMAT_LINES_PER_PAGE \b                 | \$\=     |
+                \$FORMAT_LINES_LEFT \b                     | \$\-     |
+                \$FORMAT_NAME \b                           | \$\~     |
+                \$FORMAT_TOP_NAME \b                       | \$\^ (?![A-Za-z_\{]) |
+                \$FORMAT_LINE_BREAK_CHARACTERS \b          | \$\: (?![:])         |
+                \$FORMAT_FORMFEED \b                       | \$\^L \b |
+                \$ACCUMULATOR \b                           | \$\^A \b
+
+            ) /x) {
+                die "Use of special variable '$1' deprecated in line $.\n";
+            }
+            elsif (/ ( ~~ ) /x) {
+                die "Use of operator '$1' deprecated in line $.\n";
+            }
+            for my $mustword (@mustword) {
+                if (/ \b $mustword \b /x) {
+                    $used{$mustword} = 1;
+                }
+            }
+        }
+        close(SCRIPT);
+    }
+
+    for my $mustword (@mustword) {
+        if (not $used{$mustword}) {
+            die "'$mustword' not found in $0.\n";
+        }
     }
 }
-
-# make read-only scalar variable
-sub TIESCALAR { bless \my $scalar, $_[0] }
-sub FETCH     { $$_[0] }
-sub STORE     { require Carp; Carp::croak("Can't modify read-only variable"); }
 
 1;
 
@@ -198,7 +231,7 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.01; # must version, must match
+  use Strict::Perl 2014.02; # must version, must match
 
 =head1 DESCRIPTION
 
@@ -207,17 +240,32 @@ constructs, on both modern Perl and traditional Perl.
 
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.01;
+  use Strict::Perl 2014.02;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
-On Perl 5.12 or later, Strict::Perl works as;
+On Perl 5.010001 or later, Strict::Perl works as;
 
   use strict;
   use warnings qw(FATAL all);
-  use autodie;
+  use Fatal qw(
+      seek sysseek
+      dbmclose dbmopen
+      binmode close chmod chown fcntl flock ioctl open sysopen truncate
+      chdir closedir opendir link mkdir readlink rename rmdir symlink
+      pipe
+      msgctl msgget msgrcv msgsnd
+      semctl semget semop
+      shmctl shmget shmread
+      accept bind connect getsockopt listen recv send setsockopt shutdown socketpair
+      fork
+  );
+  use autodie qw(
+      read sysread syswrite
+      fileno
+  );
 
-On Perl 5.6 or later,
+On Perl 5.006 or later,
 
   use strict;
   use warnings qw(FATAL all);
@@ -254,8 +302,10 @@ On Perl 5.00503 or later,
 
 Prohibited Keywords in your script are;
 
-  goto  redo  until  foreach  format  write  formline
-  msgctl  msgget  msgrcv  msgsnd  semctl  semget  semop
+  goto  redo  until  foreach
+  format  write  formline
+  msgctl  msgget  msgrcv  msgsnd
+  semctl  semget  semop
   shmctl  shmget  shmread  shmwrite
 
 Prohibited Special Variables are;

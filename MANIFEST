@@ -1,7 +1,8 @@
 Strict/Perl.pm
 Changes
+Makefile.PL
 pMakefile.PL
 MANIFEST
-test.pl
 README
 META.yml
+t/001_test.t
