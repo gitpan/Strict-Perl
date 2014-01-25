@@ -166,7 +166,10 @@ END
     }
 }
 
-require Strict::Perl; # get $Strict::Perl::VERSION
+# get $Strict::Perl::VERSION
+BEGIN {
+    require Strict::Perl;
+}
 
 while (@test > 0) {
     my $scriptname    = shift @test;

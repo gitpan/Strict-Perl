@@ -8,7 +8,7 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.02;
+$Strict::Perl::VERSION = 2014.03;
 
 use 5.00503;
 use strict;
@@ -59,7 +59,19 @@ sub _autodie {
 sub _SIG {
 
     # use warnings qw(FATAL all);
-    $SIG{__WARN__} =
+    $SIG{__WARN__} = sub {
+        if ($_[0] =~ /Name "main::[A-Za-z_][A-Za-z_0-9]*" used only once:/) {
+            if ($] < 5.012) {
+                # ignore message
+            }
+            else {
+                $SIG{__DIE__}->(@_);
+            }
+        }
+        else {
+            $SIG{__DIE__}->(@_);
+        }
+    };
 
     # HACK #55 Show Source Code on Errors in Chapter 6: Debugging of PERL HACKS
     $SIG{__DIE__}  = sub {
@@ -231,7 +243,7 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.02; # must version, must match
+  use Strict::Perl 2014.03; # must version, must match
 
 =head1 DESCRIPTION
 
@@ -240,7 +252,7 @@ constructs, on both modern Perl and traditional Perl.
 
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.02;
+  use Strict::Perl 2014.03;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
