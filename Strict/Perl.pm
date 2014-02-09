@@ -8,7 +8,7 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.03;
+$Strict::Perl::VERSION = 2014.04;
 
 use 5.00503;
 use strict;
@@ -17,7 +17,13 @@ local $^W = 1;
 # use strict;
 sub _strict {
     require strict;
-    strict::->import;
+    if (($] < 5.006) and exists $INC{'Fake/Our.pm'}) {
+        # no strict qw(vars); on Fake::Our used
+    }
+    else {
+        strict::->import(qw(vars));
+    }
+    strict::->import(qw(refs subs));
 }
 
 # use warnings;
@@ -60,7 +66,14 @@ sub _SIG {
 
     # use warnings qw(FATAL all);
     $SIG{__WARN__} = sub {
-        if ($_[0] =~ /Name "main::[A-Za-z_][A-Za-z_0-9]*" used only once:/) {
+
+        # avoid: Use of reserved word "our" is deprecated
+        if (($_[0] =~ /^Use of reserved word "our" is deprecated at /) and exists $INC{'Fake/Our.pm'}) {
+            # ignore message
+        }
+
+        # ignore wrong warning: Name "main::BAREWORD" used only once
+        elsif ($_[0] =~ /Name "main::[A-Za-z_][A-Za-z_0-9]*" used only once:/) {
             if ($] < 5.012) {
                 # ignore message
             }
@@ -243,16 +256,19 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.03; # must version, must match
+  use Strict::Perl 2014.04; # must version, must match
 
 =head1 DESCRIPTION
 
 Strict::Perl provides a restricted scripting environment excluding old/unsafe
 constructs, on both modern Perl and traditional Perl.
 
+Strict::Perl works in concert with Fake::Our if Fake::Our is used in your
+script.
+
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.03;
+  use Strict::Perl 2014.04;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
@@ -374,7 +390,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =item * L<ina|http://search.cpan.org/~ina/> - CPAN
 
-=item * L<The BackPAN|http://backpan.perl.org/authors/id/I/IN/INA/> - A Complete History of CPAN
+=item * L<A Complete History of CPAN|http://backpan.perl.org/authors/id/I/IN/INA/> - The BackPAN
 
 =back
 

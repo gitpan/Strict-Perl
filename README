@@ -4,16 +4,19 @@ NAME
 
 SYNOPSIS
 
-  use Strict::Perl 2014.03; # must version, must match
+  use Strict::Perl 2014.04; # must version, must match
 
 DESCRIPTION
 
   Strict::Perl provides a restricted scripting environment excluding old/unsafe
   constructs, on both modern Perl and traditional Perl.
 
+  Strict::Perl works in concert with Fake::Our if Fake::Our is used in your
+  script.
+
   Version specify is required when use Strict::Perl, like;
 
-    use Strict::Perl 2014.03;
+    use Strict::Perl 2014.04;
 
   It's die if specified version doesn't match Strict::Perl's version.
 
