@@ -62,7 +62,7 @@ close(FILE);
 exit;
 END
 
-    'badword.pl' => [<<'END', 'die'],
+    'badword_goto.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -70,6 +70,30 @@ goto LABEL;
 print "LINE=", __LINE__, "\n";
 LABEL:
 print "LINE=", __LINE__, "\n";
+exit;
+END
+
+    'badword_given.pl' => [<<'END', 'die'],
+use Strict::Perl <%MODULEVERSION%>;
+use vars qw($VERSION);
+$VERSION = 1;
+given ($_) {
+    if ($_ =~ /Strict::Perl/) {
+        print "Strict::Perl\n";
+    }
+}
+exit;
+END
+
+    'badword_when.pl' => [<<'END', 'die'],
+use Strict::Perl <%MODULEVERSION%>;
+use vars qw($VERSION);
+$VERSION = 1;
+for ($_) {
+    when ($_ =~ /Strict::Perl/) {
+        print "Strict::Perl\n";
+    }
+}
 exit;
 END
 

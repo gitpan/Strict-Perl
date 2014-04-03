@@ -8,7 +8,7 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.04;
+$Strict::Perl::VERSION = 2014.05;
 
 use 5.00503;
 use strict;
@@ -192,7 +192,8 @@ sub import {
                 format | write  | formline |
                 msgctl | msgget | msgrcv   | msgsnd  |
                 semctl | semget | semop    |
-                shmctl | shmget | shmread  | shmwrite
+                shmctl | shmget | shmread  | shmwrite |
+                given  | when
 
             ) \b /x) { # Oops! I did little overkill.
                 die "Use of '$1' statement deprecated in line $.\n";
@@ -256,7 +257,7 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.04; # must version, must match
+  use Strict::Perl 2014.05; # must version, must match
 
 =head1 DESCRIPTION
 
@@ -268,7 +269,7 @@ script.
 
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.04;
+  use Strict::Perl 2014.05;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
@@ -335,6 +336,7 @@ Prohibited Keywords in your script are;
   msgctl  msgget  msgrcv  msgsnd
   semctl  semget  semop
   shmctl  shmget  shmread  shmwrite
+  given  when
 
 Prohibited Special Variables are;
 
