@@ -4,7 +4,7 @@ NAME
 
 SYNOPSIS
 
-  use Strict::Perl 2014.05; # must version, must match
+  use Strict::Perl 2014.06; # must version, must match
 
 DESCRIPTION
 
@@ -16,7 +16,7 @@ DESCRIPTION
 
   Version specify is required when use Strict::Perl, like;
 
-    use Strict::Perl 2014.05;
+    use Strict::Perl 2014.06;
 
   It's die if specified version doesn't match Strict::Perl's version.
 
@@ -24,7 +24,7 @@ DESCRIPTION
 
     use strict;
     use warnings qw(FATAL all);
-    use Fatal qw(
+    use Fatal qw( # by compatible routine in Strict::Perl
         seek sysseek
         dbmclose dbmopen
         binmode close chmod chown fcntl flock ioctl open sysopen truncate

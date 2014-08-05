@@ -8,7 +8,7 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.05;
+$Strict::Perl::VERSION = 2014.06;
 
 use 5.00503;
 use strict;
@@ -32,11 +32,10 @@ sub _warnings {
     warnings::->import;
 }
 
-# use Fatal qw(...);
+# install Fatal CORE::* functions
 sub _Fatal {
-    require Fatal;
-    package main;
-    Fatal::->import(
+    my $package = (caller(1))[0];
+    for my $function (
         qw(seek sysseek),                                                                   # :io (excluded: read sysread syswrite)
         qw(dbmclose dbmopen),                                                               # :dbm
         qw(binmode close chmod chown fcntl flock ioctl open sysopen truncate),              # :file (excluded: fileno)
@@ -47,7 +46,101 @@ sub _Fatal {
         qw(shmctl shmget shmread),                                                          # :shm
         qw(accept bind connect getsockopt listen recv send setsockopt shutdown socketpair), # :socket
         qw(fork),                                                                           # :threads
-    );
+    ) {
+        _install_fatal_function($function, $package);
+    }
+}
+
+# make fatal invocation
+sub _fatal_invocation {
+    my($function, $proto) = @_;
+
+    my $n = -1;
+    local @_ = ();
+    my @prototype = ();
+    my $seen_semicolon = 0;
+
+    $proto =~ s/^_;/;\$/;
+    $proto =~ s/^_/;\$/;
+    while ($proto =~ /\S/) {
+        $n++;
+        if ($seen_semicolon) {
+            push @prototype, [$n, @_];
+        }
+        if ($proto =~ s/^\s*\\([\@%\$\&])//) {
+            push @_, $1 . "{\$_[$n]}";
+            next;
+        }
+        if ($proto =~ s/^\s*([*\$&])//) {
+            push @_, "\$_[$n]";
+            next;
+        }
+        if ($proto =~ s/^\s*(;\s*)?\@//) {
+            push @_, "\@_[$n..\$#_]";
+            last;
+        }
+        if ($proto =~ s/^\s*;//) {
+            $seen_semicolon = 1;
+            $n--;
+            next;
+        }
+        die "Unknown prototype letters: \"$proto\"";
+    }
+    push @prototype, [$n+1, @_];
+
+    if (@prototype == 1) {
+        my @argv = @{$prototype[0]};
+        shift @argv;
+        local $" = ', ';
+        return qq{\tCORE::$function(@argv) || croak "Can't $function(\@_): \$!";};
+    }
+    else {
+        local @_ = <<END;
+\tif (0) {
+\t}
+END
+        while (@prototype) {
+            my @argv = @{shift @prototype};
+            my $n = shift @argv;
+            local $" = ', ';
+            push @_, <<END;
+\telsif (\@_ == $n) {
+\t\treturn CORE::$function(@argv) || croak "Can't $function(\@_): \$!";
+\t}
+END
+        }
+        push @_, qq{\tdie "$function(\@_): Do not expect to get ", scalar \@_, " arguments";};
+        return join '', @_;
+    }
+}
+
+# install Fatal function to package
+sub _install_fatal_function {
+    my($function, $package) = @_;
+
+    my $proto = eval { prototype "CORE::$function" };
+    if ($@) {
+        die "$function is not a builtin";
+    }
+    if (not defined $proto) {
+        die "Cannot install a fatal function since non-overridable builtin";
+    }
+
+    my $code = <<END;
+sub ($proto) {
+\tlocal \$" = ', ';
+\tlocal \$! = 0;
+@{[_fatal_invocation($function,$proto)]}
+}
+
+END
+    {
+        no strict 'refs';
+        $code = eval "package $package; use Carp; $code";
+        die if $@;
+        local $^W = 0;
+        *{"${package}::$function"} = $code;
+    }
 }
 
 # use autodie qw(...);
@@ -172,7 +265,7 @@ sub import {
     # use strict;
     _strict();
 
-    # use Fatal qw(...);
+    # use Fatal qw(...); --- compatible routine
     _Fatal();
 
     # use autodie qw(...);
@@ -257,7 +350,7 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.05; # must version, must match
+  use Strict::Perl 2014.06; # must version, must match
 
 =head1 DESCRIPTION
 
@@ -269,7 +362,7 @@ script.
 
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.05;
+  use Strict::Perl 2014.06;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
@@ -277,7 +370,7 @@ On Perl 5.010001 or later, Strict::Perl works as;
 
   use strict;
   use warnings qw(FATAL all);
-  use Fatal qw(
+  use Fatal qw( # by compatible routine in Strict::Perl
       seek sysseek
       dbmclose dbmopen
       binmode close chmod chown fcntl flock ioctl open sysopen truncate
@@ -298,7 +391,7 @@ On Perl 5.006 or later,
 
   use strict;
   use warnings qw(FATAL all);
-  use Fatal qw(
+  use Fatal qw( # by compatible routine in Strict::Perl
       seek sysseek
       dbmclose dbmopen
       binmode close chmod chown fcntl flock ioctl open sysopen truncate
@@ -316,7 +409,7 @@ On Perl 5.00503 or later,
   use strict;
   $^W = 1;
   $SIG{__WARN__} = sub { die "$_[0]\n" };
-  use Fatal qw(
+  use Fatal qw( # by compatible routine in Strict::Perl
       seek sysseek
       dbmclose dbmopen
       binmode close chmod chown fcntl flock ioctl open sysopen truncate
