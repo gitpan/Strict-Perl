@@ -8,7 +8,7 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.06;
+$Strict::Perl::VERSION = 2014.07;
 
 use 5.00503;
 use strict;
@@ -35,19 +35,26 @@ sub _warnings {
 # install Fatal CORE::* functions
 sub _Fatal {
     my $package = (caller(1))[0];
+
     for my $function (
-        qw(seek sysseek),                                                                   # :io (excluded: read sysread syswrite)
-        qw(dbmclose dbmopen),                                                               # :dbm
-        qw(binmode close chmod chown fcntl flock ioctl open sysopen truncate),              # :file (excluded: fileno)
-        qw(chdir closedir opendir link mkdir readlink rename rmdir symlink),                # :filesys (excluded: unlink)
-        qw(pipe),                                                                           # :ipc
-        qw(msgctl msgget msgrcv msgsnd),                                                    # :msg
-        qw(semctl semget semop),                                                            # :semaphore
-        qw(shmctl shmget shmread),                                                          # :shm
-        qw(accept bind connect getsockopt listen recv send setsockopt shutdown socketpair), # :socket
-        qw(fork),                                                                           # :threads
+        qw(seek sysseek),                                                            # :io (excluded: read sysread syswrite)
+        qw(dbmclose dbmopen),                                                        # :dbm
+        qw(binmode close chmod chown fcntl flock ioctl truncate),                    # :file (excluded: fileno)
+        qw(chdir closedir link mkdir readlink rename rmdir symlink),                 # :filesys (excluded: unlink)
+        qw(msgctl msgget msgrcv msgsnd),                                             # :msg
+        qw(semctl semget semop),                                                     # :semaphore
+        qw(shmctl shmget shmread),                                                   # :shm
+        qw(bind connect getsockopt listen recv send setsockopt shutdown socketpair), # :socket
+        qw(fork),                                                                    # :threads
     ) {
         _install_fatal_function($function, $package);
+    }
+
+    # not on Modern::Open
+    if (($] >= 5.006) or not grep(m{\bModern/Open\.pm$},keys %INC)) {
+        for my $function (qw(open opendir sysopen pipe accept)) {
+            _install_fatal_function($function, $package);
+        }
     }
 }
 
@@ -60,8 +67,8 @@ sub _fatal_invocation {
     my @prototype = ();
     my $seen_semicolon = 0;
 
-    $proto =~ s/^_;/;\$/;
-    $proto =~ s/^_/;\$/;
+    $proto =~ s/_$/;\$/;
+    $proto =~ s/_;/;\$/;
     while ($proto =~ /\S/) {
         $n++;
         if ($seen_semicolon) {
@@ -350,7 +357,7 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.06; # must version, must match
+  use Strict::Perl 2014.07; # must version, must match
 
 =head1 DESCRIPTION
 
@@ -362,7 +369,7 @@ script.
 
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.06;
+  use Strict::Perl 2014.07;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
@@ -461,6 +468,8 @@ Prohibited Operator is;
 Must Keyword in your script is;
 
   VERSION
+  Any of scalar variable or any variable, subroutine name,
+  literal string, or comment
 
 Be useful software for you!
 
