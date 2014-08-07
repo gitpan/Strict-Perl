@@ -8,7 +8,7 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.07;
+$Strict::Perl::VERSION = 2014.08;
 
 use 5.00503;
 use strict;
@@ -242,6 +242,18 @@ sub INIT {
 
     # use English; $WARNING = 1;
     $^W = 1;
+
+    # disable prohibited modules
+    for my $module (qw(
+        Thread.pm
+        threads.pm
+        encoding.pm
+        Switch.pm
+    )) {
+        if (exists $INC{$module}) {
+            die "Deprecate module '$module' used.\n";
+        }
+    }
 }
 
 use vars qw($VERSION_called);
@@ -357,19 +369,19 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.07; # must version, must match
+  use Strict::Perl 2014.08; # must version, must match
 
 =head1 DESCRIPTION
 
 Strict::Perl provides a restricted scripting environment excluding old/unsafe
 constructs, on both modern Perl and traditional Perl.
 
-Strict::Perl works in concert with Fake::Our if Fake::Our is used in your
-script.
+Strict::Perl works in concert with Modern::Open and Fake::Our if those are used
+in your script.
 
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.07;
+  use Strict::Perl 2014.08;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
@@ -464,6 +476,10 @@ Prohibited Special Variables are;
 Prohibited Operator is;
 
   ~~ (smartmatch)
+
+Prohibited modules in script are;
+
+  Thread  threads  encoding  Switch
 
 Must Keyword in your script is;
 

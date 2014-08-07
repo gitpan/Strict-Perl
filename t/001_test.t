@@ -156,6 +156,38 @@ unlink('not_exists.txt');
 exit;
 END
 
+    'use_Thread.pl' => [<<'END', 'die'],
+use Strict::Perl <%MODULEVERSION%>;
+use vars qw($VERSION);
+$VERSION = 1;
+use Thread;
+exit;
+END
+
+    'use_threads.pl' => [<<'END', 'die'],
+use Strict::Perl <%MODULEVERSION%>;
+use vars qw($VERSION);
+$VERSION = 1;
+use threads;
+exit;
+END
+
+    'use_encoding.pl' => [<<'END', 'die'],
+use Strict::Perl <%MODULEVERSION%>;
+use vars qw($VERSION);
+$VERSION = 1;
+use encoding;
+exit;
+END
+
+    'use_Switch.pl' => [<<'END', 'die'],
+use Strict::Perl <%MODULEVERSION%>;
+use vars qw($VERSION);
+$VERSION = 1;
+use Switch;
+exit;
+END
+
     );
 
     use vars qw($tests);
