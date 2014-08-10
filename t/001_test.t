@@ -6,54 +6,54 @@ use vars qw(@test);
 BEGIN {
     @test = (
 
-    'exit.pl' => [<<'END', 'notdie'],
+    '001_exit.pl' => [<<'END', 'notdie'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
 exit;
 END
 
-    'die.pl' => [<<'END', 'die'],
+    '002_die.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
 die;
 END
 
-    'must_moduleversion.pl' => [<<'END', 'die'],
+    '003_must_moduleversion.pl' => [<<'END', 'die'],
 use Strict::Perl;
 use vars qw($VERSION);
 $VERSION = 1;
 exit;
 END
 
-    'must_moduleversion_match.pl' => [<<'END', 'die'],
+    '004_must_moduleversion_match.pl' => [<<'END', 'die'],
 use Strict::Perl 9999.99;
 use vars qw($VERSION);
 $VERSION = 1;
 exit;
 END
 
-    'must_scriptversion.pl' => [<<'END', 'die'],
+    '005_must_scriptversion.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 exit;
 END
 
-    'strict.pl' => [<<'END', 'die'],
+    '006_strict.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 $VERSION = 1;
 $VAR = 1;
 exit;
 END
 
-    'warnings.pl' => [<<'END', 'die'],
+    '007_warnings.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 print "VERSION=$VERSION";
 exit;
 END
 
-    'autodie.pl' => [<<'END', 'die'],
+    '008_autodie.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -62,7 +62,7 @@ close(FILE);
 exit;
 END
 
-    'badword_goto.pl' => [<<'END', 'die'],
+    '009_badword_goto.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -73,7 +73,7 @@ print "LINE=", __LINE__, "\n";
 exit;
 END
 
-    'badword_given.pl' => [<<'END', 'die'],
+    '010_badword_given.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -85,7 +85,7 @@ given ($_) {
 exit;
 END
 
-    'badword_when.pl' => [<<'END', 'die'],
+    '011_badword_when.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -97,7 +97,7 @@ for ($_) {
 exit;
 END
 
-    'badvariable.pl' => [<<'END', 'die'],
+    '012_badvariable.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -105,7 +105,7 @@ print "\$[=($[)\n";
 exit;
 END
 
-    'goodvariable.pl' => [<<'END', 'notdie'],
+    '013_goodvariable.pl' => [<<'END', 'notdie'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -113,7 +113,7 @@ print "\$^W=($^W)\n";
 exit;
 END
 
-    'badoperator.pl' => [<<'END', 'die'],
+    '014_badoperator.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -123,7 +123,7 @@ if ('Strict' ~~ 'Perl') {
 exit;
 END
 
-    'bareword.pl' => [<<'END', 'notdie'],
+    '015_bareword.pl' => [<<'END', 'notdie'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -132,7 +132,7 @@ close(FILE);
 exit;
 END
 
-    'fileno_0.pl' => [<<'END', 'notdie'],
+    '016_fileno_0.pl' => [<<'END', 'notdie'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -140,7 +140,7 @@ print "fileno(STDIN)=(",fileno(STDIN),")\n";
 exit;
 END
 
-    'fileno_undef.pl' => [<<'END', 'die'],
+    '017_fileno_undef.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -148,7 +148,7 @@ print "fileno(FILE)=(",fileno(FILE),")\n";
 exit;
 END
 
-    'unlink.pl' => [<<'END', 'notdie'],
+    '018_unlink.pl' => [<<'END', 'notdie'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -156,7 +156,7 @@ unlink('not_exists.txt');
 exit;
 END
 
-    'use_Thread.pl' => [<<'END', 'die'],
+    '019_use_Thread.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -164,15 +164,7 @@ use Thread;
 exit;
 END
 
-    'use_bytes.pl' => [<<'END', 'die'],
-use Strict::Perl <%MODULEVERSION%>;
-use vars qw($VERSION);
-$VERSION = 1;
-use bytes;
-exit;
-END
-
-    'use_threads.pl' => [<<'END', 'die'],
+    '020_use_threads.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -180,7 +172,7 @@ use threads;
 exit;
 END
 
-    'use_encoding.pl' => [<<'END', 'die'],
+    '021_use_encoding.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;
@@ -188,7 +180,7 @@ use encoding;
 exit;
 END
 
-    'use_Switch.pl' => [<<'END', 'die'],
+    '022_use_Switch.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
 $VERSION = 1;

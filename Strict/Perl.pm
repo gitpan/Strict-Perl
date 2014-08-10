@@ -8,7 +8,7 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.09;
+$Strict::Perl::VERSION = 2014.10;
 
 use 5.00503;
 use strict;
@@ -246,7 +246,6 @@ sub INIT {
     # disable prohibited modules
     for my $module (qw(
         Thread.pm
-        bytes.pm
         threads.pm
         encoding.pm
         Switch.pm
@@ -370,7 +369,7 @@ Strict::Perl - Perl module to restrict old/unsafe constructs
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.09; # must version, must match
+  use Strict::Perl 2014.10; # must version, must match
 
 =head1 DESCRIPTION
 
@@ -382,7 +381,7 @@ in your script.
 
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.09;
+  use Strict::Perl 2014.10;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
@@ -480,7 +479,7 @@ Prohibited Operator is;
 
 Prohibited modules in script are;
 
-  Thread  bytes  threads  encoding  Switch
+  Thread  threads  encoding  Switch
 
 Must Keyword in your script is;
 
