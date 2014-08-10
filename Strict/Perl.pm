@@ -8,7 +8,7 @@ package Strict::Perl;
 # Copyright (c) 2014 INABA Hitoshi <ina@cpan.org>
 ######################################################################
 
-$Strict::Perl::VERSION = 2014.08;
+$Strict::Perl::VERSION = 2014.09;
 
 use 5.00503;
 use strict;
@@ -51,7 +51,7 @@ sub _Fatal {
     }
 
     # not on Modern::Open
-    if (($] >= 5.006) or not grep(m{\bModern/Open\.pm$},keys %INC)) {
+    if (($] >= 5.006) or not exists $INC{'Modern/Open.pm'}) {
         for my $function (qw(open opendir sysopen pipe accept)) {
             _install_fatal_function($function, $package);
         }
@@ -246,6 +246,7 @@ sub INIT {
     # disable prohibited modules
     for my $module (qw(
         Thread.pm
+        bytes.pm
         threads.pm
         encoding.pm
         Switch.pm
@@ -365,11 +366,11 @@ __END__
 
 =head1 NAME
 
-  Strict::Perl - Perl module to restrict old/unsafe constructs
+Strict::Perl - Perl module to restrict old/unsafe constructs
 
 =head1 SYNOPSIS
 
-  use Strict::Perl 2014.08; # must version, must match
+  use Strict::Perl 2014.09; # must version, must match
 
 =head1 DESCRIPTION
 
@@ -381,7 +382,7 @@ in your script.
 
 Version specify is required when use Strict::Perl, like;
 
-  use Strict::Perl 2014.08;
+  use Strict::Perl 2014.09;
 
 It's die if specified version doesn't match Strict::Perl's version.
 
@@ -479,7 +480,7 @@ Prohibited Operator is;
 
 Prohibited modules in script are;
 
-  Thread  threads  encoding  Switch
+  Thread  bytes  threads  encoding  Switch
 
 Must Keyword in your script is;
 

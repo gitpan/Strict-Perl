@@ -4,7 +4,7 @@ NAME
 
 SYNOPSIS
 
-  use Strict::Perl 2014.08; # must version, must match
+  use Strict::Perl 2014.09; # must version, must match
 
 DESCRIPTION
 
@@ -16,7 +16,7 @@ DESCRIPTION
 
   Version specify is required when use Strict::Perl, like;
 
-    use Strict::Perl 2014.08;
+    use Strict::Perl 2014.09;
 
   It's die if specified version doesn't match Strict::Perl's version.
 
@@ -75,7 +75,7 @@ DESCRIPTION
 
   Prohibited modules in script are;
 
-    Thread  threads  encoding  Switch
+    Thread  bytes  threads  encoding  Switch
 
   Must Keyword in your script is;
 

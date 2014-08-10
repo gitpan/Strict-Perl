@@ -164,6 +164,14 @@ use Thread;
 exit;
 END
 
+    'use_bytes.pl' => [<<'END', 'die'],
+use Strict::Perl <%MODULEVERSION%>;
+use vars qw($VERSION);
+$VERSION = 1;
+use bytes;
+exit;
+END
+
     'use_threads.pl' => [<<'END', 'die'],
 use Strict::Perl <%MODULEVERSION%>;
 use vars qw($VERSION);
